@@ -2,10 +2,18 @@ import json, urllib.request
 from collections import deque
 
 API = "http://127.0.0.1:8080/v1.0/topology"
-def get(p): return json.load(urllib.request.urlopen(f"{API}/{p}"))
+def get(p):
+    try:
+        return json.load(urllib.request.urlopen(f"{API}/{p}", timeout=3))
+    except Exception as e:
+        raise SystemExit(f"ERROR: cannot reach Ryu topology API at {API} ({e}). "
+                         "Is the controller running with ryu.app.rest_topology?")
 
 SRC_IP = "10.0.0.1"
-probe = json.load(open("/tmp/probe_result.json"))
+try:
+    probe = json.load(open("/tmp/probe_result.json"))
+except (OSError, ValueError):
+    raise SystemExit("ERROR: no valid /tmp/probe_result.json - run udp_probe.py first")
 DST_IP = probe["dst"]
 
 switches = [s["dpid"] for s in get("switches")]
@@ -14,7 +22,8 @@ hosts = get("hosts")
 
 graph = {s: set() for s in switches}
 for l in links:
-    graph[l["src"]["dpid"]].add(l["dst"]["dpid"])
+    if l["src"]["dpid"] in graph and l["dst"]["dpid"] in graph:
+        graph[l["src"]["dpid"]].add(l["dst"]["dpid"])
 
 def host_switch(ip):
     for h in hosts:
@@ -46,8 +55,10 @@ print(f"Replies received: {probe['received']}")
 print(f"Probes timed out: {probe['sent'] - probe['received']}")
 print(f"Observed loss: {probe['loss_pct']}%")
 print(f"Jitter: {probe['jitter_ms']} ms")
-if not path or probe["loss_pct"] == 100:
-    print("DIAGNOSIS: path FAILED")
+if not path:
+    print("DIAGNOSIS: path FAILED - topology has no route (link/switch down)")
+elif probe["loss_pct"] == 100:
+    print("DIAGNOSIS: path FAILED - route exists but no replies (server down or forwarding broken)")
 elif probe["loss_pct"] > 0:
     print("DIAGNOSIS: DEGRADED path - packet loss on", route)
 else:
