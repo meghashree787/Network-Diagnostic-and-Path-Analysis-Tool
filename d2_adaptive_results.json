@@ -1,0 +1,800 @@
+{
+ "static": {
+  "mode": "static",
+  "fault_loss_per_direction_pct": 15,
+  "fault_duration_s": 60,
+  "probes_sent_during_fault": 250,
+  "probes_lost_during_fault": 84,
+  "loss_pct_during_fault": 33.6,
+  "avg_rtt_during_fault_ms": 47.8,
+  "reroute_count": 0,
+  "time_to_first_reroute_s": null,
+  "t_fault": 4.45,
+  "bursts": [
+   {
+    "t": 1.47,
+    "phase": "healthy",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 43.43,
+    "action": null
+   },
+   {
+    "t": 2.95,
+    "phase": "healthy",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 44.38,
+    "action": null
+   },
+   {
+    "t": 4.42,
+    "phase": "healthy",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 43.15,
+    "action": null
+   },
+   {
+    "t": 6.78,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 44.95,
+    "action": null
+   },
+   {
+    "t": 9.57,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 44.91,
+    "action": null
+   },
+   {
+    "t": 11.35,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 1,
+    "loss_pct": 10.0,
+    "rtt_avg_ms": 46.05,
+    "action": null
+   },
+   {
+    "t": 13.62,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 43.6,
+    "action": null
+   },
+   {
+    "t": 15.64,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 2,
+    "loss_pct": 20.0,
+    "rtt_avg_ms": 44.31,
+    "action": null
+   },
+   {
+    "t": 18.44,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 46.5,
+    "action": null
+   },
+   {
+    "t": 20.24,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 1,
+    "loss_pct": 10.0,
+    "rtt_avg_ms": 48.11,
+    "action": null
+   },
+   {
+    "t": 22.8,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 43.94,
+    "action": null
+   },
+   {
+    "t": 25.33,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 46.24,
+    "action": null
+   },
+   {
+    "t": 27.88,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 43.41,
+    "action": null
+   },
+   {
+    "t": 30.41,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 45.47,
+    "action": null
+   },
+   {
+    "t": 32.21,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 1,
+    "loss_pct": 10.0,
+    "rtt_avg_ms": 46.94,
+    "action": null
+   },
+   {
+    "t": 35.0,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 47.89,
+    "action": null
+   },
+   {
+    "t": 37.0,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 2,
+    "loss_pct": 20.0,
+    "rtt_avg_ms": 44.71,
+    "action": null
+   },
+   {
+    "t": 39.27,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 42.81,
+    "action": null
+   },
+   {
+    "t": 41.0,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 1,
+    "loss_pct": 10.0,
+    "rtt_avg_ms": 43.62,
+    "action": null
+   },
+   {
+    "t": 44.07,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 6,
+    "loss_pct": 60.0,
+    "rtt_avg_ms": 48.83,
+    "action": null
+   },
+   {
+    "t": 46.09,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 1,
+    "loss_pct": 10.0,
+    "rtt_avg_ms": 73.87,
+    "action": null
+   },
+   {
+    "t": 48.91,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 46.02,
+    "action": null
+   },
+   {
+    "t": 51.92,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 64.53,
+    "action": null
+   },
+   {
+    "t": 54.79,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 46.15,
+    "action": null
+   },
+   {
+    "t": 57.35,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 47.05,
+    "action": null
+   },
+   {
+    "t": 59.66,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 47.35,
+    "action": null
+   },
+   {
+    "t": 62.02,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 51.58,
+    "action": null
+   },
+   {
+    "t": 64.58,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 46.17,
+    "action": null
+   }
+  ]
+ },
+ "adaptive": {
+  "mode": "adaptive",
+  "fault_loss_per_direction_pct": 15,
+  "fault_duration_s": 60,
+  "probes_sent_during_fault": 240,
+  "probes_lost_during_fault": 23,
+  "loss_pct_during_fault": 9.58,
+  "avg_rtt_during_fault_ms": 104.8,
+  "reroute_count": 2,
+  "time_to_first_reroute_s": 7.2,
+  "t_fault": 4.76,
+  "bursts": [
+   {
+    "t": 1.52,
+    "phase": "healthy",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 47.27,
+    "action": null
+   },
+   {
+    "t": 3.21,
+    "phase": "healthy",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 48.64,
+    "action": null
+   },
+   {
+    "t": 4.72,
+    "phase": "healthy",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 45.84,
+    "action": null
+   },
+   {
+    "t": 6.82,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 2,
+    "loss_pct": 20.0,
+    "rtt_avg_ms": 46.94,
+    "action": null
+   },
+   {
+    "t": 9.65,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 5,
+    "loss_pct": 50.0,
+    "rtt_avg_ms": 47.33,
+    "action": null
+   },
+   {
+    "t": 12.0,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 43.97,
+    "action": "reroute away from s1-s2-s4 (window loss 33.3%)"
+   },
+   {
+    "t": 15.33,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 124.63,
+    "action": null
+   },
+   {
+    "t": 17.66,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 125.53,
+    "action": null
+   },
+   {
+    "t": 20.01,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 128.08,
+    "action": null
+   },
+   {
+    "t": 22.43,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 133.13,
+    "action": null
+   },
+   {
+    "t": 24.77,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 125.98,
+    "action": null
+   },
+   {
+    "t": 27.08,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 124.75,
+    "action": null
+   },
+   {
+    "t": 29.42,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 128.78,
+    "action": null
+   },
+   {
+    "t": 31.79,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 129.88,
+    "action": null
+   },
+   {
+    "t": 34.13,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 127.64,
+    "action": "trial: policy cleared, re-testing preferred path"
+   },
+   {
+    "t": 37.44,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 3,
+    "loss_pct": 30.0,
+    "rtt_avg_ms": 46.09,
+    "action": null
+   },
+   {
+    "t": 39.46,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 2,
+    "loss_pct": 20.0,
+    "rtt_avg_ms": 42.96,
+    "action": null
+   },
+   {
+    "t": 42.04,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 46.52,
+    "action": "reroute away from s1-s2-s4 (window loss 30.0%)"
+   },
+   {
+    "t": 45.41,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 129.07,
+    "action": null
+   },
+   {
+    "t": 47.92,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 134.65,
+    "action": null
+   },
+   {
+    "t": 50.33,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 130.9,
+    "action": null
+   },
+   {
+    "t": 52.79,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 133.88,
+    "action": null
+   },
+   {
+    "t": 55.18,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 133.68,
+    "action": null
+   },
+   {
+    "t": 57.53,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 127.28,
+    "action": null
+   },
+   {
+    "t": 59.84,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 125.13,
+    "action": null
+   },
+   {
+    "t": 62.23,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s3",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 0,
+    "loss_pct": 0.0,
+    "rtt_avg_ms": 131.08,
+    "action": "trial: policy cleared, re-testing preferred path"
+   },
+   {
+    "t": 65.81,
+    "phase": "fault",
+    "path": [
+     "s1",
+     "s2",
+     "s4"
+    ],
+    "sent": 10,
+    "lost": 4,
+    "loss_pct": 40.0,
+    "rtt_avg_ms": 47.41,
+    "action": null
+   }
+  ]
+ }
+}

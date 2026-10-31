@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D2 SDN Diagnostic Dashboard</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1d2430; --muted:#667085; --line:#e2e5ea;
+          --ok:#1d7a4d; --warn:#b26a00; --bad:#b42318; --accent:#2457c5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14171c; --card:#1d2128; --text:#e8eaee; --muted:#9aa3b2; --line:#303642;
+            --ok:#4cc38a; --warn:#f0a43a; --bad:#ff7b72; --accent:#7aa2ff; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; }
+  header a { color:var(--accent); font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:14px; padding:16px 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card h2 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .big { font-size:22px; font-weight:600; }
+  .muted { color:var(--muted); }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  button { font:inherit; padding:5px 10px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--text); cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:6px 0; }
+  input { font:inherit; padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--text); width:110px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:3px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:500; }
+  pre { margin:8px 0 0; white-space:pre-wrap; font:12px/1.4 ui-monospace, monospace; }
+  #msg { padding:0 20px; min-height:20px; font-size:13px; }
+  .scroll { max-height:220px; overflow:auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>D2 SDN Diagnostic Dashboard</h1>
+  <a href="index.html">Full diagnosis view (D1 style)</a>
+  <span id="ctrlstate" class="muted">connecting...</span>
+</header>
+<div id="msg"></div>
+<div class="grid">
+
+  <div class="card">
+    <h2>Active route</h2>
+    <div id="route" class="big">-</div>
+    <div id="routeinfo" class="muted">-</div>
+    <div id="links" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Routing policy</h2>
+    <div id="policy">-</div>
+    <div class="row">
+      <button onclick="setPolicy({avoid:[], avoid_links:[]})">Clear policy (use fastest)</button>
+      <button onclick="setPolicy({avoid_links:[[1,2]]})">Avoid link s1-s2</button>
+      <button onclick="setPolicy({avoid:[2]})">Avoid switch s2</button>
+    </div>
+    <div class="muted">A link policy is soft: it is ignored if it would leave no path.</div>
+  </div>
+
+  <div class="card">
+    <h2>Link control</h2>
+    <div id="linkctl"></div>
+    <div class="muted">Uses ip link on the Mininet interfaces (dashboard must run with sudo).</div>
+  </div>
+
+  <div class="card">
+    <h2>Diagnose now</h2>
+    <div class="row">
+      <input id="dst" value="10.0.0.2" aria-label="destination IP">
+      <input id="count" value="20" style="width:60px" aria-label="probe count">
+      <button class="primary" id="diagbtn" onclick="diagnose()">Run probe + analyse</button>
+    </div>
+    <div id="diagout" class="muted">No result yet.</div>
+  </div>
+
+  <div class="card">
+    <h2>Adaptive rerouting (loss-aware)</h2>
+    <div class="row">
+      <button id="autobtn" class="primary" onclick="toggleAuto()">Start</button>
+      <span id="autoinfo" class="muted"></span>
+    </div>
+    <div class="scroll">
+      <table><thead><tr><th>time</th><th>path</th><th>loss %</th><th>RTT ms</th><th>action</th></tr></thead>
+      <tbody id="autolog"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Controller events</h2>
+    <div class="scroll"><table><tbody id="events"></tbody></table></div>
+  </div>
+
+</div>
+<script>
+const LINKS = [["s1","s2"],["s2","s4"],["s1","s3"],["s3","s4"]];
+let autoOn = false;
+
+function msg(text, cls) {
+  const m = document.getElementById("msg");
+  m.textContent = text || "";
+  m.className = cls || "";
+}
+async function api(path, body) {
+  const opt = body === undefined ? {} :
+    { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  const j = await r.json();
+  if (!r.ok || j.error) throw new Error(j.error || r.statusText);
+  return j;
+}
+function td(tr, text, cls) {
+  const c = document.createElement("td");
+  c.textContent = text == null ? "-" : text;
+  if (cls) c.className = cls;
+  tr.appendChild(c);
+}
+
+async function refresh() {
+  try {
+    const s = await api("/api/state");
+    const st = s.controller, route = s.route || {};
+    document.getElementById("ctrlstate").textContent =
+      "controller OK - " + st.switches.length + " switches, " + st.links.length + " links up";
+    document.getElementById("route").textContent =
+      route.path ? route.path.join(" \u2192 ") : (route.error ? "unknown" : "NO PATH");
+    document.getElementById("routeinfo").textContent = route.path
+      ? "one-way cost " + route.cost_ms + " ms, predicted RTT " + (2 * route.cost_ms) + " ms"
+      : (route.error || "no route between the hosts");
+    document.getElementById("links").textContent = "Links up: " +
+      (st.links.map(l => l.a + "-" + l.b + " (" + l.cost_ms + " ms)").join(", ") || "none");
+    document.getElementById("policy").textContent =
+      "avoid switches: " + (st.avoid.length ? st.avoid.join(", ") : "none") +
+      " | avoid links: " + (st.avoid_links.length ? st.avoid_links.join(", ") : "none");
+
+    const ev = document.getElementById("events");
+    ev.replaceChildren();
+    st.events.slice(-15).reverse().forEach(e => {
+      const tr = document.createElement("tr");
+      td(tr, new Date(e.time * 1000).toLocaleTimeString(), "muted");
+      td(tr, e.event);
+      ev.appendChild(tr);
+    });
+
+    const a = s.auto;
+    autoOn = a.on;
+    document.getElementById("autobtn").textContent = a.on ? "Stop" : "Start";
+    document.getElementById("autoinfo").textContent = a.error ? "error: " + a.error :
+      (a.on ? "monitoring " + a.dst + " | window loss " +
+        (a.window_loss == null ? "collecting..." : a.window_loss.toFixed(1) + "%") +
+        " | threshold " + a.settings.loss_threshold_pct + "%" : "off");
+    const lg = document.getElementById("autolog");
+    lg.replaceChildren();
+    a.log.slice(-12).reverse().forEach(e => {
+      const tr = document.createElement("tr");
+      td(tr, e.time, "muted"); td(tr, e.path);
+      td(tr, e.loss_pct, e.loss_pct > 0 ? "warn" : "ok");
+      td(tr, e.rtt_avg_ms); td(tr, e.action || "");
+      lg.appendChild(tr);
+    });
+  } catch (e) {
+    document.getElementById("ctrlstate").textContent = "controller unreachable";
+    msg(e.message, "bad");
+  }
+}
+
+async function setPolicy(body) {
+  try { await api("/api/policy", body); msg("Policy updated.", "ok"); refresh(); }
+  catch (e) { msg(e.message, "bad"); }
+}
+async function linkAction(a, b, action) {
+  try { await api("/api/link", {a, b, action}); msg("Link " + a + "-" + b + " " + action + ".", "ok"); setTimeout(refresh, 800); }
+  catch (e) { msg(e.message, "bad"); }
+}
+async function toggleAuto() {
+  try {
+    await api("/api/auto", {on: !autoOn, dst: document.getElementById("dst").value});
+    refresh();
+  } catch (e) { msg(e.message, "bad"); }
+}
+async function diagnose() {
+  const btn = document.getElementById("diagbtn"), out = document.getElementById("diagout");
+  btn.disabled = true; out.textContent = "Probing...";
+  try {
+    const r = await api("/api/diagnose", {dst: document.getElementById("dst").value,
+                                          count: parseInt(document.getElementById("count").value, 10)});
+    out.replaceChildren();
+    const h = document.createElement("div");
+    h.className = "big " + (r.status === "healthy" ? "ok" : r.status === "degraded" ? "warn" : "bad");
+    h.textContent = r.diagnosis;
+    out.appendChild(h);
+    const p = r.probe, pre = document.createElement("pre");
+    pre.textContent =
+      "path: " + (r.primary ? r.primary.join(" -> ") : "none") + "\n" +
+      "sent " + p.sent + ", received " + p.received + ", timed out " + (p.sent - p.received) +
+      ", loss " + p.loss_pct + "%\n" +
+      "RTT min/avg/max " + p.rtt_min_ms + "/" + p.rtt_avg_ms + "/" + p.rtt_max_ms + " ms, jitter " + p.jitter_ms + " ms\n" +
+      (r.rtt_note ? r.rtt_note + "\n" : "") +
+      (r.cause ? "cause: " + r.cause + "\n" : "") +
+      (r.recommend ? "suggestion: " + r.recommend + "\n" : "") +
+      (r.warnings.length ? "warning: " + r.warnings.join(" ") : "");
+    out.appendChild(pre);
+  } catch (e) { out.textContent = "Error: " + e.message; }
+  btn.disabled = false;
+}
+
+const lc = document.getElementById("linkctl");
+LINKS.forEach(([a, b]) => {
+  const row = document.createElement("div");
+  row.className = "row";
+  const name = document.createElement("span");
+  name.textContent = a + " - " + b; name.style.width = "70px";
+  const f = document.createElement("button"); f.textContent = "Fail"; f.onclick = () => linkAction(a, b, "down");
+  const r = document.createElement("button"); r.textContent = "Restore"; r.onclick = () => linkAction(a, b, "up");
+  row.append(name, f, r);
+  lc.appendChild(row);
+});
+
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

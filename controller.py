@@ -25,7 +25,9 @@ class DiagController(app_manager.RyuApp):
         self.dps = {}          # dpid -> datapath
         self.link_ports = {}   # (src_dpid, dst_dpid) -> src port number
         self.hosts = {}        # mac -> {dpid, port, ip}
-        self.avoid = set()     # switches excluded from routing (policy)
+        self.avoid = set()     # switches excluded from routing (policy, hard)
+        self.avoid_links = set()  # frozenset({a, b}) links to avoid (policy, soft:
+                                  # ignored if it would leave no path at all)
         self.event_log = []       # event log for the analyzer
         kwargs['wsgi'].register(DiagRest, {'app': self})
 
@@ -166,22 +168,28 @@ class DiagController(app_manager.RyuApp):
             actions=[parser.OFPActionOutput(out_ports[0])], data=msg.data))
 
     # ---------- path computation ----------
-    def build_graph(self):
+    def build_graph(self, use_link_policy=True):
         g = nx.Graph()
         for (s, d) in self.link_ports:
             if s < d and (d, s) in self.link_ports:
+                if use_link_policy and frozenset((s, d)) in self.avoid_links:
+                    continue
                 g.add_edge(s, d, weight=LINK_COST.get((s, d), 10))
         return g
 
     def compute_path(self, src, dst):
         if src == dst:
             return [src]
-        g = self.build_graph()
-        g.remove_nodes_from([n for n in self.avoid if n not in (src, dst)])
-        try:
-            return nx.shortest_path(g, src, dst, weight='weight')
-        except (nx.NetworkXNoPath, nx.NodeNotFound):
-            return None
+        # First honour the avoid-links policy; if that leaves no path at all,
+        # fall back to ignoring it so traffic is never cut off by policy alone.
+        for use_link_policy in (True, False):
+            g = self.build_graph(use_link_policy)
+            g.remove_nodes_from([n for n in self.avoid if n not in (src, dst)])
+            try:
+                return nx.shortest_path(g, src, dst, weight='weight')
+            except (nx.NetworkXNoPath, nx.NodeNotFound):
+                continue
+        return None
 
     # ---------- data for the REST API ----------
     def get_state(self):
@@ -193,7 +201,11 @@ class DiagController(app_manager.RyuApp):
         return {"switches": sorted("s%d" % d for d in self.dps),
                 "links": links, "hosts": hosts,
                 "avoid": sorted("s%d" % n for n in self.avoid),
+                "avoid_links": self.avoid_links_text(),
                 "events": self.event_log[-100:]}
+
+    def avoid_links_text(self):
+        return sorted("s%d-s%d" % tuple(sorted(p)) for p in self.avoid_links)
 
     def path_between(self, src_ip, dst_ip):
         def find(ip):
@@ -212,10 +224,18 @@ class DiagController(app_manager.RyuApp):
         return {"src": src_ip, "dst": dst_ip,
                 "path": ["s%d" % n for n in path], "cost_ms": cost}
 
-    def set_avoid(self, switches):
-        self.avoid = set(int(x) for x in switches)
-        self.log_event("policy: avoid switches %s" % sorted(self.avoid))
+    def set_policy(self, avoid=None, avoid_links=None):
+        """Update only the fields that are given (None = leave unchanged)."""
+        if avoid is not None:
+            self.avoid = set(int(x) for x in avoid)
+        if avoid_links is not None:
+            self.avoid_links = set(frozenset((int(a), int(b))) for a, b in avoid_links)
+        self.log_event("policy: avoid switches %s, avoid links %s" % (
+            sorted(self.avoid), self.avoid_links_text()))
         self.flush_flows()
+
+    def set_avoid(self, switches):
+        self.set_policy(avoid=switches)
 
 
 class DiagRest(ControllerBase):
@@ -239,7 +259,8 @@ class DiagRest(ControllerBase):
     def policy(self, req, **kwargs):
         try:
             body = json.loads(req.body.decode('utf-8'))
-            self.app.set_avoid(body.get('avoid', []))
+            self.app.set_policy(body.get('avoid'), body.get('avoid_links'))
         except Exception as e:
             return self._json({"error": str(e)}, status=400)
-        return self._json({"ok": True, "avoid": sorted(self.app.avoid)})
+        return self._json({"ok": True, "avoid": sorted(self.app.avoid),
+                           "avoid_links": self.app.avoid_links_text()})
