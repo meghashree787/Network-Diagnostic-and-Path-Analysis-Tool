@@ -113,3 +113,9 @@ tbody tr.pick { cursor: pointer; } tbody tr.pick:hover, tbody tr.sel { backgroun
 .lk.down button { background: var(--ok); }
 button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); font-weight: 500; font-size: .8rem; }
 code { font-family: var(--mono); font-size: .85em; }
+
+.row.live-actions { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.live-kv { margin:8px 0 14px; }
+button.ghost { background:var(--panel2); color:var(--text); border:1px solid var(--line); }
+#autoInfo { margin:0; }
+#autoTable td, #eventTable td { white-space:normal; }
