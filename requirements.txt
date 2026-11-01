@@ -1,0 +1,7 @@
+# Ryu controller dependencies
+ryu
+networkx
+webob
+
+# Optional: required only to regenerate the evaluation graphs
+matplotlib
