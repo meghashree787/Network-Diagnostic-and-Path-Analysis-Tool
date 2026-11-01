@@ -235,3 +235,71 @@ $("resetBtn").addEventListener("click", async () => {
 });
 
 loadTopology(); loadHistory();
+
+
+// D2 live controller and adaptive-routing integration
+let adaptiveOn = false;
+async function liveApi(path, body) {
+  const options = body === undefined ? {} : { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) };
+  const response = await fetch(path, options);
+  const data = await response.json();
+  if (!response.ok || data.error) throw new Error(data.error || response.statusText);
+  return data;
+}
+function addLiveCell(row, value, className) {
+  const cell = document.createElement("td");
+  cell.textContent = value == null || value === "" ? "–" : String(value);
+  if (className) cell.className = className;
+  row.appendChild(cell);
+}
+async function refreshLiveState() {
+  try {
+    const [state, topology] = await Promise.all([liveApi("/api/state"), liveApi("/api/topology")]);
+    const c = state.controller, route = state.route || {};
+    $("liveController").textContent = c.switches.length + " switches connected; " + c.links.length + " links up";
+    $("liveRoute").textContent = route.path ? route.path.join(" → ") : (route.error || "No active route");
+    $("liveRouteCost").textContent = route.cost_ms == null ? "–" : route.cost_ms + " ms one-way (estimated RTT " + (2*route.cost_ms) + " ms)";
+    $("livePolicy").textContent = "Avoid switches: " + (c.avoid.length ? c.avoid.join(", ") : "none") +
+      " | Avoid links: " + (c.avoid_links.length ? c.avoid_links.join(", ") : "none");
+    const changed = JSON.stringify(topo && topo.links) !== JSON.stringify(topology.links);
+    topo = { ...topo, ...topology };
+    if (changed || !last) { draw(); renderLinkCtl(); }
+    const a = state.auto;
+    adaptiveOn = a.on;
+    $("autoBtn").textContent = a.on ? "Stop adaptive monitor" : "Start adaptive monitor";
+    $("autoInfo").textContent = a.error ? "Monitor error: " + a.error :
+      (a.on ? "Monitoring " + a.dst + " | window loss: " + (a.window_loss == null ? "collecting…" : a.window_loss.toFixed(1)+"%") +
+       " | trigger: " + a.settings.loss_threshold_pct + "%" : "Monitor is off.");
+    const log = $("autoTable").querySelector("tbody"); log.replaceChildren();
+    if (!a.log.length) { const row=document.createElement("tr"); addLiveCell(row,"No adaptive-monitor samples yet.","empty"); log.append(row); }
+    a.log.slice(-10).reverse().forEach(x => {
+      const row=document.createElement("tr");
+      addLiveCell(row,x.time); addLiveCell(row,x.path);
+      addLiveCell(row,x.loss_pct+"%",x.loss_pct>0?"warn":"ok");
+      addLiveCell(row,x.rtt_avg_ms == null ? "–" : x.rtt_avg_ms+" ms");
+      addLiveCell(row,x.action || "Monitoring"); log.append(row);
+    });
+    const events=$("eventTable").querySelector("tbody"); events.replaceChildren();
+    c.events.slice(-10).reverse().forEach(x => {
+      const row=document.createElement("tr");
+      addLiveCell(row,new Date(x.time*1000).toLocaleTimeString(),"muted"); addLiveCell(row,x.event); events.append(row);
+    });
+    if (!c.events.length) { const row=document.createElement("tr"); addLiveCell(row,"No controller events yet.","empty"); events.append(row); }
+  } catch (error) {
+    $("liveController").textContent="Controller unavailable";
+    $("liveRoute").textContent=error.message;
+  }
+}
+async function updatePolicy(policy) {
+  try { await liveApi("/api/policy",policy); say("Routing policy updated.",false); await refreshLiveState(); await loadTopology(); }
+  catch(error) { say("Policy update failed: "+error.message,true); }
+}
+$("clearPolicyBtn").addEventListener("click",()=>updatePolicy({avoid:[],avoid_links:[]}));
+$("avoidFastBtn").addEventListener("click",()=>updatePolicy({avoid_links:[[1,2]]}));
+$("avoidSwitchBtn").addEventListener("click",()=>updatePolicy({avoid:[2]}));
+$("autoBtn").addEventListener("click",async()=>{
+  try { await liveApi("/api/auto",{on:!adaptiveOn,dst:$("dstIp").value.trim()}); await refreshLiveState(); }
+  catch(error) { say("Adaptive monitor error: "+error.message,true); }
+});
+refreshLiveState();
+setInterval(refreshLiveState,2000);
